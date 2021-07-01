@@ -1,0 +1,128 @@
+html {
+  height: 100%;
+}
+
+body {
+  height: 100%;
+  min-height: 100%;
+  background: #fdf6e3;
+  color: #073642;
+}
+
+.container-fluid {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.title.row {
+  background-image: url("icon.svg");
+  background-color: #fdf6e3;
+  background-size: contain;
+  background-repeat: no-repeat;
+  padding-left: 50px;
+  margin: 10px;
+}
+
+@media only screen and (max-width: 382px) {
+  .title.row {
+     background-blend-mode: difference;
+  }
+}
+
+.main.row {
+  flex-grow: 1;
+}
+
+.main.row [class^="col"] {
+  height: 100%;
+}
+
+#code {
+  padding: 15px;
+}
+
+#code.loading::after {
+    content: url("spinner.svg");
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: .7;
+    background: white;
+    z-index: 1000;
+    font-size: 5em;
+    text-align: center;
+    padding-top: 25%;
+}
+
+.btn-default {
+  background-color: #073642;
+}
+
+.btn-default:hover {
+  background-color: #586e75;
+}
+
+.btn-circle {
+  border-radius: 100%;
+  width: 35px;
+  height: 35px;
+  padding: 0px;
+  background-color: #268bd2;
+  position: absolute;
+  top: 0px;
+  right: 10px;
+}
+
+.btn-circle:hover {
+  background-color: #8eb5d1;
+}
+
+
+/* Animated loading bar */
+#output-loading {
+  display: none;
+}
+
+#output-loading.loading {
+  display: block;
+}
+
+.loading-container {
+  margin: 5px;
+  background-color: #fdf6e3;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  height: .15em;
+}
+
+.animated {
+  animation-fill-mode: both;
+}
+
+@keyframes backAndForth {
+  from {
+    left: -30%;
+    width: 50%;
+  }
+
+  to {
+    left: 80%;
+    width: 50%;
+  }
+}
+
+.loading-bar {
+  position: absolute;
+  height: 5px;
+  background-color: #073642;
+
+  animation-duration: 1s;
+  animation-name: backAndForth;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+  animation-timing-function: ease-in-out;
+}

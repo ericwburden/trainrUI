@@ -1,0 +1,61 @@
+version: "3.8"
+services:
+
+  proxy:
+    image: traefik:v2.4
+    container_name: proxy
+    command:
+      - --log.level=DEBUG
+      - --api.insecure=true
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --entrypoints.web.address=:80
+    ports:
+      - 80:80
+    networks:
+      - ${TRAEFIK_PUBLIC_NETWORK?Variable not set}
+      - default
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.api.rule=Host(`dashboard.${DOMAIN?Variable not set}`)
+      - traefik.http.routers.api.service=api@internal
+      - traefik.http.routers.api.entrypoints=web
+
+
+  shiny:
+    image: ericwburden/trainr-ui
+    build:
+      context: ./trainrUI
+      dockerfile: Dockerfile
+    container_name: trainrUI
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.shiny.rule=Host(`${DOMAIN?Variable not set}`)||Host(`www.${DOMAIN?Variable not set}`)
+      - traefik.http.routers.shiny.entrypoints=web
+      - traefik.http.services.shiny.loadbalancer.server.port=3838
+
+
+  redis:
+    image: redis:alpine
+    container_name: redis
+    labels:
+      - traefik.enable=true
+      - traefik.http.services.redis.loadbalancer.server.port=6379
+
+  api:
+    image: ericwburden/trainr-api
+    build:
+      context: ./trainrAPI
+      dockerfile: Dockerfile
+    container_name: trainrAPI
+    labels:
+      - traefik.enable=true
+      - traefik.http.services.api.loadbalancer.server.port=8000
+
+
+networks:
+  traefik-public:
+    # Allow setting it to false for testing
+    external: ${TRAEFIK_PUBLIC_NETWORK_IS_EXTERNAL-true}
