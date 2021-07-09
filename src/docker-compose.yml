@@ -10,7 +10,6 @@ services:
       - --accesslog
       - --providers.docker=true
       - --providers.docker.swarmMode=true
-      - --providers.docker.constraints=Label(`traefik.constraint-label-stack`, `${TRAEFIK_TAG?Variable not set}`)
       - --providers.docker.exposedbydefault=false
       - --providers.docker.network=web
       - --entrypoints.web.address=:80
@@ -27,8 +26,7 @@ services:
       - 80:80
       - 443:443
     networks:
-      - ${TRAEFIK_PUBLIC_NETWORK?Variable not set}
-      - default
+      - web
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - letsencrypt:/letsencrypt
@@ -38,12 +36,6 @@ services:
       placement:
         constraints:
           - node.role == manager
-      labels:
-        - traefik.enable=true
-        - traefik.http.routers.api.rule=Host(`dashboard.${DOMAIN?Variable not set}`)
-        - traefik.http.routers.api.service=api@internal
-        - traefik.http.routers.api.entrypoints=web
-
       labels:
         - "traefik.enable=true"
 
@@ -71,12 +63,9 @@ services:
   shiny:
     image: ericwburden/trainr-ui
     container_name: trainrUI
-    depends_on:
-      - traefik
-      - redis
     networks:
-      - ${TRAEFIK_PUBLIC_NETWORK?Variable not set}
-      - default
+      - web
+      - internal
     env_file:
       - .env
     deploy:
@@ -107,7 +96,7 @@ services:
     volumes:
       - redis_data:/data
     networks:
-      - default
+      - internal
     deploy:
       placement:
         constraints:
@@ -131,11 +120,16 @@ services:
     image: ericwburden/trainr-api
     container_name: trainrAPI
     networks:
-      - default
+      - internal
     deploy:
       placement:
         constraints:
           - node.role == worker
+      update_config:
+        parallelism: 2
+        delay: 15s
+      mode: replicated
+      replicas: 4
       labels:
         - "traefik.enable=true"
         - "traefik.http.services.api.loadbalancer.server.port=8000"
@@ -145,11 +139,18 @@ services:
         max_attempts: 3
         window: 120s
     healthcheck:
-      test: curl --silent --fail http://0.0.0.0:8000/_ping || exit 1
+      test: ["CMD", "curl", "-f", "http://api:8000/_ping"]
       interval: 30s
       timeout: 30s
       retries: 3
 
 
 networks:
-  traefik-public: {}
+  web:
+    external: true
+  internal:
+    exernal: false
+
+volumes:
+  letsencrypt: {}
+  redis_data: {}

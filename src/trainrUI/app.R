@@ -14,8 +14,11 @@ library(shiny)
 library(shinyAce)
 library(shinyjs)
 library(shinythemes)
+library(shinyTree)
 library(trainr)
 library(uuid)
+
+source("util.R")
 
 save_to_redis <- function(key, value) {
     rredis::redisSet(key, value)
@@ -35,13 +38,22 @@ ui <- shiny::tags$html(
                 class = "title",
                 column(
                     12,
-                    titlePanel("Learn R with Tests!"),
+                    style = "display: flex; align-items: flex-start;",
+                    div(titlePanel("Learn R with Tests!"), style = "flex-grow: 1;"),
                     actionButton(
-                        "help",
+                        "progress",
                         label = NULL,
-                        icon = icon("question"),
-                        class = "btn-info btn-small btn-circle center-block pull-right")
+                        class = "progress-icon btn-small btn-circle center-block"
+                    ),
+                    div(
+                        style = "margin-left: 10px",
+                        actionButton(
+                            "help",
+                            label = NULL,
+                            class = "question-mark-icon btn-small btn-circle center-block"
+                        )
                     )
+                )
             ),
             fluidRow(
                 class = "main",
@@ -89,7 +101,6 @@ server <- function(input, output, session) {
     } else {
         token$session
     }
-
 
     # If we can connect to Redis, try to pull down an exercise listing for this
     # session key
@@ -139,21 +150,47 @@ server <- function(input, output, session) {
         shinyjs::addClass("output-loading", "loading")
 
         input_lines <- stringr::str_split(input$code, "\n", simplify = T)
+        current_exercise_data <- as.list(subset(
+            readRDS(paste0(TRAINR_DIR, "/.exercises")),
+            current,
+            chapter:exercise
+        ))
+
         result <- httr::POST(
             "api:8000/eval",
-            body = list(lines = jsonlite::toJSON(input_lines))
+            body = list(
+                lines = jsonlite::toJSON(input_lines),
+                chapter = jsonlite::toJSON(current_exercise_data$chapter),
+                lesson = jsonlite::toJSON(current_exercise_data$lesson),
+                exercise = jsonlite::toJSON(current_exercise_data$exercise)
+            )
         )
-        result_list <- jsonlite::fromJSON(httr::content(result, "text"))
-        output <- paste(result_list$msg, collapse = "</br>")
 
-        shinyjs::html(
-            "output",
-            html = "<span style=\"color:#268bd2;\"><h3>Result:</h3></span>"
-        )
-        shinyjs::html("output", html = output, add = TRUE)
+        if (httr::status_code(result) == 200) {
+            result_list <- jsonlite::fromJSON(httr::content(result, "text"))
+            output <- paste(result_list$msg, collapse = "</br>")
+
+            shinyjs::html(
+                "output",
+                html = "<span style=\"color:#268bd2;\"><h3>Result:</h3></span>"
+            )
+            shinyjs::html("output", html = output, add = TRUE)
+
+            if (result_list$success) trainr::mark_current_exercise_complete(TRAINR_DIR)
+        } else {
+            shinyjs::html(
+                "output",
+                html = "<span style=\"color:#dc322f;\"><h3>Error!</h3></span>"
+            )
+            err_msg <- paste0(
+                "</br><span style=\"color:#dc322f;\"><b>",
+                "Something went wrong, if the problem persists, ",
+                "please report to the system administrator.",
+                "</b></span>"
+            )
+            shinyjs::html("output", html = err_msg, add = TRUE)
+        }
         shinyjs::removeClass("output-loading", "loading")
-
-        if (result_list$success) trainr::mark_current_exercise_complete(TRAINR_DIR)
     })
 
 
@@ -193,6 +230,20 @@ server <- function(input, output, session) {
             "remain active for 30 days after last accessed."
         ))
 
+    })
+
+    # Show the progress modal
+    observeEvent(input$progress, {
+        showModal(modalDialog(
+            title = "My Progress",
+            shinyTree("tree", stripes = TRUE, multiple = FALSE, animation = FALSE)
+        ))
+
+        output$tree <- renderTree({
+            ex_list <- get_exercise_listing(TRAINR_DIR)
+            text_added <- add_descriptions(ex_list)
+            tree_list(text_added)
+        })
     })
 
 

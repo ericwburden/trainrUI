@@ -9,7 +9,7 @@ RUN R -e "install.packages('stringr', repos='https://cloud.r-project.org/')"
 RUN R -e "install.packages('testthat', repos='https://cloud.r-project.org/')"
 
 RUN R -e "install.packages('remotes', repos='https://cloud.r-project.org/')"
-RUN R -e "remotes::install_github('ericwburden/trainr@0.7.1')"
+RUN R -e "remotes::install_github('ericwburden/trainr@0.9.0')"
 
 # Install API
 COPY ./plumber.R /app/plumber.R

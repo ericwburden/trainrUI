@@ -38,9 +38,10 @@ RUN R -e "install.packages('shinyjs',, repos='https://cloud.r-project.org/')"
 RUN R -e "install.packages('shinythemes', repos='https://cloud.r-project.org/')"
 RUN R -e "install.packages('stringr', repos='https://cloud.r-project.org/')"
 RUN R -e "install.packages('uuid', repos='https://cloud.r-project.org/')"
+RUN R -e "install.packages('shinyTree', repos='https://cloud.r-project.org/')"
 
 RUN R -e "install.packages('remotes', repos='https://cloud.r-project.org/')"
-RUN R -e "remotes::install_github('ericwburden/trainr@0.7.1')"
+RUN R -e "remotes::install_github('ericwburden/trainr@0.9.0')"
 
 # Install Shiny App
 COPY . /srv/shiny-server/

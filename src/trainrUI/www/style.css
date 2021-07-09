@@ -69,11 +69,8 @@ body {
   border-radius: 100%;
   width: 35px;
   height: 35px;
-  padding: 0px;
+  padding: 5px;
   background-color: #268bd2;
-  position: absolute;
-  top: 0px;
-  right: 10px;
 }
 
 .btn-circle:hover {
@@ -125,4 +122,23 @@ body {
   animation-iteration-count: infinite;
   animation-direction: alternate;
   animation-timing-function: ease-in-out;
+}
+
+
+/* Icons */
+.question-mark-icon {
+  background-image: url("question-mark.svg");
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-origin: content-box;
+}
+
+
+.progress-icon {
+  background-image: url("progress.svg");
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-origin: content-box;
 }
