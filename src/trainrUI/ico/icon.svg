@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="134.32961mm"
+   height="134.32961mm"
+   viewBox="0 0 134.32961 134.32961"
+   version="1.1"
+   id="svg5"
+   inkscape:version="1.1 (c68e22c387, 2021-05-23)"
+   sodipodi:docname="icon.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:snap-object-midpoints="true"
+     inkscape:snap-bbox="true"
+     inkscape:snap-bbox-midpoints="true"
+     showguides="true"
+     inkscape:guide-bbox="true"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0"
+     inkscape:zoom="1"
+     inkscape:cx="139.5"
+     inkscape:cy="267.5"
+     inkscape:window-width="1914"
+     inkscape:window-height="1028"
+     inkscape:window-x="1920"
+     inkscape:window-y="26"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1">
+    <sodipodi:guide
+       position="67.164796,67.164801"
+       orientation="0,-1"
+       id="guide34362" />
+  </sodipodi:namedview>
+  <defs
+     id="defs2" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-43.375965,-159.12099)">
+    <rect
+       style="fill:#002b36;fill-opacity:1;stroke-width:7.99999;stroke-linecap:square"
+       id="rect846"
+       width="134.32961"
+       height="134.32961"
+       x="43.375965"
+       y="159.12099"
+       rx="67.164803"
+       ry="67.164803" />
+    <g
+       id="g34504"
+       style="fill:#dc322f;fill-opacity:1">
+      <rect
+         style="fill:#dc322f;fill-opacity:1;stroke-width:6.35157;stroke-linecap:square"
+         id="rect33802"
+         width="132.01405"
+         height="11.273676"
+         x="44.533737"
+         y="220.64896" />
+      <rect
+         style="fill:#dc322f;fill-opacity:1;stroke-width:5.7376;stroke-linecap:square"
+         id="rect33928-5"
+         width="12.52525"
+         height="46.767872"
+         x="161.32614"
+         y="202.90186"
+         ry="7.2405391"
+         rx="6.2626252" />
+      <rect
+         style="fill:#dc322f;fill-opacity:1;stroke-width:7.10052;stroke-linecap:square"
+         id="rect33928-5-2-5"
+         width="12.52525"
+         height="71.62545"
+         x="148.99461"
+         y="190.47307"
+         ry="6.2719712"
+         rx="6.2626252" />
+      <rect
+         style="fill:#dc322f;fill-opacity:1;stroke-width:5.7376;stroke-linecap:square"
+         id="rect33928-5-4"
+         width="12.52525"
+         height="46.767872"
+         x="47.063438"
+         y="202.90186"
+         ry="7.2405391"
+         rx="6.2626252" />
+      <rect
+         style="fill:#dc322f;fill-opacity:1;stroke-width:7.10052;stroke-linecap:square"
+         id="rect33928-5-2-5-7"
+         width="12.52525"
+         height="71.62545"
+         x="59.450226"
+         y="190.47307"
+         ry="6.2719712"
+         rx="6.2626252" />
+    </g>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:136.369px;line-height:1.25;font-family:'Source Code Pro';-inkscape-font-specification:'Source Code Pro';fill:#eee8d5;fill-opacity:1;stroke:none;stroke-width:3.40923"
+       x="65.947975"
+       y="270.74222"
+       id="text2422"><tspan
+         sodipodi:role="line"
+         id="tspan2420"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Source Code Pro';-inkscape-font-specification:'Source Code Pro';fill:#eee8d5;fill-opacity:1;stroke-width:3.40923"
+         x="65.947975"
+         y="270.74222">R</tspan></text>
+  </g>
+</svg>
