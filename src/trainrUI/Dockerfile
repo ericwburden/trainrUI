@@ -1,4 +1,4 @@
-FROM r-base:4.0.5
+FROM r-base:4.1.2
 
 MAINTAINER Eric Burden "eric.w.burden@gmail.com"
 
@@ -41,7 +41,7 @@ RUN R -e "install.packages('uuid', repos='https://cloud.r-project.org/')"
 RUN R -e "install.packages('shinyTree', repos='https://cloud.r-project.org/')"
 
 RUN R -e "install.packages('remotes', repos='https://cloud.r-project.org/')"
-RUN R -e "remotes::install_github('ericwburden/trainr@0.9.0')"
+RUN R -e "remotes::install_github('ericwburden/trainr@0.11.0')"
 
 # Install Shiny App
 COPY . /srv/shiny-server/

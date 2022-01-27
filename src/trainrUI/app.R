@@ -25,7 +25,6 @@ save_to_redis <- function(key, value) {
     rredis::redisExpire(key, 2.6e6)
 }
 
-# Define UI for application that draws a histogram
 ui <- shiny::tags$html(
     shiny::tags$body(
         fluidPage(
@@ -87,7 +86,6 @@ ui <- shiny::tags$html(
     shiny::tags$footer()
 )
 
-# Define server logic required to draw a histogram
 server <- function(input, output, session) {
     # Show loader on Ace editor
     shinyjs::addClass("code", "loading")

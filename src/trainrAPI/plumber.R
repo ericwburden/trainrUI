@@ -21,7 +21,8 @@ TRAINR_DIR <- trainr::setup_dir(getwd(), "shiny")
 #* @param exercise:character
 #* @post /eval
 function(lines, chapter, lesson, exercise) {
-  message("\n\nchapter: ", chapter)
+  message("\n\nResponse at:", Sys.time())
+  message("chapter: ", chapter)
   message("lesson: ", lesson)
   message("exercise: ", exercise, "\n")
   original_file_path <- system.file(
