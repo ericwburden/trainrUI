@@ -1,138 +1,106 @@
-version: "3.8"
+version: '3.3'
+
+# Need to set the following environment variables
+# DOMAIN // The web address of the application, `trainr.dev`
+# EMAIL  // The email address for letsencrypt
+# USERNAME        // Username for the Traefik dashboard
+# HASHED_PASSWORD // Password for the Traefik dahsboard, '$(openssl passwd -apr1)'
+
 services:
 
   traefik:
-    image: traefik:v2.4
-    container_name: proxy
-    command:
-      - --api
-      - --log
-      - --accesslog
-      - --providers.docker=true
-      - --providers.docker.swarmMode=true
-      - --providers.docker.exposedbydefault=false
-      - --providers.docker.network=web
-      - --entrypoints.web.address=:80
-      - --entrypoints.web-secure.address=:443
-
-      # LetsEncrypt Config
-      - --certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory
-      - --certificatesresolvers.myresolver.acme.email=${ACME_EMAIL}
-      - --certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json
-      - --certificatesresolvers.myresolver.acme.storage=/acme.json
-      - --certificatesresolvers.myresolver.acme.dnschallenge=true
-      - --certificatesresolvers.myresolver.acme.dnschallenge.provider=${DNS_PROVIDER}
+    image: traefik:v2.2
     ports:
       - 80:80
       - 443:443
-    networks:
-      - web
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - letsencrypt:/letsencrypt
-    env_file:
-      - .env
     deploy:
       placement:
         constraints:
-          - node.role == manager
+          - node.labels.traefik-public.traefik-public-certificates == true
       labels:
-        - "traefik.enable=true"
-
-        - "traefik.http.routers.traefik.tls=true"
-        - "traefik.http.routers.traefik.tls.certresolver=myresolver"
-        - "traefik.http.routers.traefik.rule=Host(`traefik.${DOMAIN}`)"
-        - "traefik.http.routers.traefik.service=api@internal"
-        - "traefik.http.routers.traefik.middlewares=authtraefik"
-        - "traefik.http.middlewares.authtraefik.basicauth.users=${TRAEFIK_CREDENTIALS}"
-        - "traefik.http.services.traefik.loadbalancer.server.port=8080"
-
-        # Redirect all HTTP to HTTPS permanently
-        - "traefik.http.routers.http_catchall.rule=HostRegexp(`{any:.+}`)"
-        - "traefik.http.routers.http_catchall.entrypoints=web"
-        - "traefik.http.routers.http_catchall.middlewares=https_redirect"
-        - "traefik.http.middlewares.https_redirect.redirectscheme.scheme=https"
-        - "traefik.http.middlewares.https_redirect.redirectscheme.permanent=true"
+        - traefik.enable=true
+        - traefik.docker.network=traefik-public
+        - traefik.constraint-label=traefik-public
+        - traefik.http.middlewares.admin-auth.basicauth.users=${USERNAME?Variable not set}:${HASHED_PASSWORD?Variable not set}
+        - traefik.http.middlewares.https-redirect.redirectscheme.scheme=https
+        - traefik.http.middlewares.https-redirect.redirectscheme.permanent=true
+        - traefik.http.routers.traefik-public-http.rule=Host(`traefik.${DOMAIN?Variable not set}`)
+        - traefik.http.routers.traefik-public-http.entrypoints=http
+        - traefik.http.routers.traefik-public-http.middlewares=https-redirect
+        - traefik.http.routers.traefik-public-https.rule=Host(`traefik.${DOMAIN?Variable not set}`)
+        - traefik.http.routers.traefik-public-https.entrypoints=https
+        - traefik.http.routers.traefik-public-https.tls=true
+        - traefik.http.routers.traefik-public-https.service=api@internal
+        - traefik.http.routers.traefik-public-https.tls.certresolver=le
+        - traefik.http.routers.traefik-public-https.middlewares=admin-auth
+        - traefik.http.services.traefik-public.loadbalancer.server.port=8080
       restart_policy:
         condition: on-failure
         delay: 5s
         max_attempts: 3
         window: 120s
-
-
-  shiny:
-    image: ericwburden/trainr-ui
-    container_name: trainrUI
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik-public-certificates:/certificates
+    command:
+      - --providers.docker
+      - --providers.docker.constraints=Label(`traefik.constraint-label`, `traefik-public`)
+      - --providers.docker.exposedbydefault=false
+      - --providers.docker.swarmmode
+      - --entrypoints.http.address=:80
+      - --entrypoints.https.address=:443
+      - --certificatesresolvers.le.acme.email=${EMAIL?Variable not set}
+      - --certificatesresolvers.le.acme.storage=/certificates/acme.json
+      - --certificatesresolvers.le.acme.tlschallenge=true
+      - --certificatesresolvers.le.acme.caserver=https://acme-v02.api.letsencrypt.org/directory
+      #- --certificatesresolvers.le.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory
+      - --accesslog
+      - --log
+      - --log.level=DEBUG
+      - --api
     networks:
-      - web
+      - traefik-public
+
+
+  trainr:
+    image: ericwburden/trainr-ui
+    networks:
+      - traefik-public
       - internal
-    env_file:
-      - .env
     deploy:
       labels:
-        - "traefik.enable=true"
-        - "traefik.http.routers.shiny.rule=Host(`${DOMAIN?Variable not set}`)||Host(`www.${DOMAIN?Variable not set}`)"
-        - "traefik.http.services.shiny.loadbalancer.server.port=3838"
-        - "traefik.http.routers.shiny.tls=true"
-        - "traefik.http.routers.shiny.tls.certresolver=myresolver"
-      placement:
-        constraints:
-          - node.role == worker
+        - traefik.enable=true
+        - traefik.docker.network=traefik-public
+        - traefik.constraint-label=traefik-public
+        - traefik.http.routers.trainr.tls=true
+        - traefik.http.routers.trainr.tls.certresolver=le
+        - traefik.http.routers.trainr.rule=Host(`${DOMAIN?Variable not set}`)||Host(`www.${DOMAIN?Variable not set}`)
+        - traefik.http.services.trainr.loadbalancer.server.port=3838
       update_config:
         parallelism: 2
         delay: 15s
       mode: replicated
-      replicas: 4
+      replicas: 2
       restart_policy:
         condition: on-failure
         delay: 5s
         max_attempts: 3
         window: 120s
-
-
-  redis:
-    image: redis:alpine
-    container_name: redis
-    volumes:
-      - redis_data:/data
-    networks:
-      - internal
-    deploy:
-      placement:
-        constraints:
-          - node.role == manager
-      labels:
-        - "traefik.enable=true"
-        - "traefik.http.services.redis.loadbalancer.server.port=6379"
-      restart_policy:
-        condition: on-failure
-        delay: 5s
-        max_attempts: 3
-        window: 120s
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 1s
-      timeout: 3s
-      retries: 30
 
 
   api:
     image: ericwburden/trainr-api
-    container_name: trainrAPI
     networks:
       - internal
     deploy:
-      placement:
-        constraints:
-          - node.role == worker
+      labels:
+        - traefik.enable=true
+        - traefik.http.services.trainr-api.loadbalancer.server.port=8000
       update_config:
         parallelism: 2
         delay: 15s
       mode: replicated
-      replicas: 4
-      labels:
-        - "traefik.enable=true"
-        - "traefik.http.services.api.loadbalancer.server.port=8000"
+      replicas: 2
       restart_policy:
         condition: on-failure
         delay: 5s
@@ -145,12 +113,33 @@ services:
       retries: 3
 
 
-networks:
-  web:
-    external: true
-  internal:
-    exernal: false
+  redis:
+    image: redis
+    networks:
+      - internal
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      labels:
+        - traefik.enable=true
+        - traefik.http.services.trainr-api.loadbalancer.server.port=6379
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 1s
+      timeout: 3s
+      retries: 30
+
 
 volumes:
-  letsencrypt: {}
-  redis_data: {}
+  traefik-public-certificates: {}
+
+networks:
+  traefik-public:
+    external: true
+  internal: {}
